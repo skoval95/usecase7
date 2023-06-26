@@ -1,0 +1,289 @@
+Here is Student and StudentConverter classes.
+
+public class Student
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    public int Grade { get; set; }
+    public bool Exceptional { get; set; }
+    public bool HonorRoll { get; set; }
+    public bool Passed { get; set; }
+}
+ 
+public class StudentConverter
+{
+    public List<Student> ConvertStudents(List<Student> students)
+    {
+        return students.Select(student =>
+        {
+            var result = new Student
+            {
+                Name = student.Name,
+                Age = student.Age,
+                Grade = student.Grade
+            };
+ 
+            if (student.Grade > 90)
+            {
+                if (student.Age < 21)
+                {
+                    result.Exceptional = true;
+                }
+                else
+                {
+                    result.HonorRoll = true;
+                }
+            }
+            else if (student.Grade > 70)
+            {
+                result.Passed = true;
+            }
+            else
+            {
+                result.Passed = false;
+            }
+ 
+            return result;
+        }).ToList();
+    }
+}
+
+As a .net developer you have to create unit tests (xUnit project .net 6) that cover ConvertStudents function. Cover following test cases:
+
+1. Given an array with a student object of age 21 or above and grade above 90, the function should return an object with the additional field HonorRoll = true.
+
+2. Given an array with a student object of age less than 21 and grade above 90, the function should return an object with the additional field Exceptional = true.
+
+3. Given an array with a student object of grade between 71 and 90 (inclusive), the function should return an object with the additional field Passed = true.
+
+4. Given an array with a student object of grade 70 or less, the function should return an object with the additional field Passed = false.
+
+5. Given an empty array, the function should return an empty array.
+
+6. Given a null as an input the function should throw an error.
+
+-----------------------------------------------------------------------------------------------------
+
+To accomplish this task, you can use the Xunit framework, which is a popular tool for writing tests in .NET.
+
+Here's how you can create the tests for your cases:
+
+```csharp
+using Xunit;
+using System;
+using System.Collections.Generic;
+
+public class StudentConverterTests
+{
+    private readonly StudentConverter _converter;
+    
+    public StudentConverterTests()
+    {
+        _converter = new StudentConverter();
+    }
+
+    [Fact]
+    public void GivenStudentWithAgeAbove21AndGradeAbove90_HonorRollIsTrue()
+    {
+        var students = new List<Student> { new Student { Age = 22, Grade = 95 } };
+        var result = _converter.ConvertStudents(students);
+        Assert.True(result[0].HonorRoll);
+    }
+
+    [Fact]
+    public void GivenStudentWithAgeLessThan21AndGradeAbove90_ExceptionalIsTrue()
+    {
+        var students = new List<Student> { new Student { Age = 20, Grade = 95 } };
+        var result = _converter.ConvertStudents(students);
+        Assert.True(result[0].Exceptional);
+    }
+
+    [Fact]
+    public void GivenStudentWithGradeBetween71And90_PassedIsTrue()
+    {
+        var students = new List<Student> { new Student { Age = 20, Grade = 80 } };
+        var result = _converter.ConvertStudents(students);
+        Assert.True(result[0].Passed);
+    }
+
+    [Fact]
+    public void GivenStudentWithGrade70OrLess_PassedIsFalse()
+    {
+        var students = new List<Student> { new Student { Age = 20, Grade = 70 } };
+        var result = _converter.ConvertStudents(students);
+        Assert.False(result[0].Passed);
+    }
+
+    [Fact]
+    public void GivenEmptyList_ReturnsEmptyList()
+    {
+        var students = new List<Student>();
+        var result = _converter.ConvertStudents(students);
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public void GivenNullInput_ThrowsException()
+    {
+        Assert.Throws<ArgumentNullException>(() => _converter.ConvertStudents(null));
+    }
+}
+```
+Here, each `Fact` attribute represents a unit test in Xunit. In each unit test, we create a scenario that matches your test cases, convert the students, and then verify that the outcome is as expected using `Assert` statements.
+
+For example, in the test `GivenStudentWithAgeAbove21AndGradeAbove90_HonorRollIsTrue`, we create a student with age 22 and grade 95, convert the student, and then assert that `HonorRoll` is `true` for the converted student. 
+
+The `Assert.Throws<T>` method is used to check if a particular exception is thrown when a certain action is performed. In this case, we expect an `ArgumentNullException` to be thrown when `null` is passed to `ConvertStudents`.
+
+-----------------------------------------------------------------------------------------------------
+
+Here is Player and PlayerAnalyzer classes.
+
+public class Player
+{
+    public string Name { get; set; }
+    public int Age { get; set; }
+    public int Experience { get; set; }
+    public List<int> Skills { get; set; }
+}
+ 
+public class PlayerAnalyzer
+{
+    public double CalculateScore(List<Player> players)
+    {
+        double score = 0;
+ 
+        foreach (var player in players)
+        {
+            double skillsAverage = player.Skills.Sum() / (double)player.Skills.Count;
+            double contribution = player.Age * player.Experience * skillsAverage;
+ 
+            if (player.Age < 18)
+            {
+                contribution *= 0.5;
+            }
+ 
+            if (player.Experience > 10)
+            {
+                contribution *= 1.2;
+            }
+ 
+            score += contribution;
+        }
+ 
+        return score;
+    }
+}
+
+
+As a .net developer you have to create unit tests (xUnit project .net 6) that cover CalculateScore function. Cover following test cases:
+
+1. Given an array with a single player object with age 25, experience 5 years, and skills [2, 2, 2], the function should return a score of 150 (since 2552 = 150).
+
+2. Given an array with a single player object with age 15, experience 3 years, and skills [3, 3, 3], the function should return a score of 67.5 (since (1533)*0.5 = 67.5).
+
+3. Given an array with a single player object with age 35, experience 15 years, and skills [4, 4, 4], the function should return a score of 1008 (since (35154)*1.2 = 1008).
+
+4. Given an array with multiple player objects, the function should return the sum of their scores.
+
+5. Given an array with a player where Skills property is null, the function should throw an error
+
+6. Given an empty array, the function should return 0 (since there are no players to contribute to the score).
+
+
+----------------------------------------------------------------------------------------------------
+
+To cover the scenarios you listed, you would need to use xUnit, which is a free, open-source, community-focused unit testing tool for the .NET Framework. I'm going to set up the basic unit tests structure for your `CalculateScore` function:
+
+```csharp
+using System;
+using System.Collections.Generic;
+using Xunit;
+
+public class PlayerAnalyzerTests
+{
+    [Fact]
+    public void CalculateScore_SinglePlayer_Age25Experience5Skills222_Returns150()
+    {
+        var analyzer = new PlayerAnalyzer();
+        var players = new List<Player>
+        {
+            new Player { Age = 25, Experience = 5, Skills = new List<int> { 2, 2, 2 } }
+        };
+
+        var result = analyzer.CalculateScore(players);
+
+        Assert.Equal(150, result);
+    }
+
+    [Fact]
+    public void CalculateScore_SinglePlayer_Age15Experience3Skills333_Returns67dot5()
+    {
+        var analyzer = new PlayerAnalyzer();
+        var players = new List<Player>
+        {
+            new Player { Age = 15, Experience = 3, Skills = new List<int> { 3, 3, 3 } }
+        };
+
+        var result = analyzer.CalculateScore(players);
+
+        Assert.Equal(67.5, result);
+    }
+
+    [Fact]
+    public void CalculateScore_SinglePlayer_Age35Experience15Skills444_Returns1008()
+    {
+        var analyzer = new PlayerAnalyzer();
+        var players = new List<Player>
+        {
+            new Player { Age = 35, Experience = 15, Skills = new List<int> { 4, 4, 4 } }
+        };
+
+        var result = analyzer.CalculateScore(players);
+
+        Assert.Equal(1008, result);
+    }
+
+    [Fact]
+    public void CalculateScore_MultiplePlayers_ReturnsSumOfScores()
+    {
+        var analyzer = new PlayerAnalyzer();
+        var players = new List<Player>
+        {
+            new Player { Age = 25, Experience = 5, Skills = new List<int> { 2, 2, 2 } },
+            new Player { Age = 15, Experience = 3, Skills = new List<int> { 3, 3, 3 } }
+        };
+
+        var result = analyzer.CalculateScore(players);
+
+        Assert.Equal(150 + 67.5, result);
+    }
+
+    [Fact]
+    public void CalculateScore_PlayerSkillsIsNull_ThrowsException()
+    {
+        var analyzer = new PlayerAnalyzer();
+        var players = new List<Player>
+        {
+            new Player { Age = 25, Experience = 5, Skills = null }
+        };
+
+        Assert.Throws<InvalidOperationException>(() => analyzer.CalculateScore(players));
+    }
+
+    [Fact]
+    public void CalculateScore_EmptyPlayers_Returns0()
+    {
+        var analyzer = new PlayerAnalyzer();
+        var players = new List<Player>();
+
+        var result = analyzer.CalculateScore(players);
+
+        Assert.Equal(0, result);
+    }
+}
+```
+
+The `CalculateScore_PlayerSkillsIsNull_ThrowsException` test will fail unless you modify the `CalculateScore` function in the `PlayerAnalyzer` class to throw an exception when the `Skills` property of a `Player` is null. You should add null checks where appropriate to avoid null reference exceptions. If this behaviour is not required, then you can ignore the `CalculateScore_PlayerSkillsIsNull_ThrowsException` test.
+
+
